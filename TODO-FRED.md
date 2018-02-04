@@ -1,4 +1,5 @@
 Todo list fredbi:
+- [x] zero datetime
 - [] godoc
 - [] ISO currency
 - [] ISO-2 and 3 country code
@@ -6,4 +7,6 @@ Todo list fredbi:
 - [] LEI code
 - [] IBAN
 - [] BIC
+- [] Visa/Mastercard
+- [] ...
 - [] formats as plugin
