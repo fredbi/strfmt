@@ -95,6 +95,13 @@ type DateTime time.Time
 
 // NewDateTime is a representation of zero value for DateTime type
 func NewDateTime() DateTime {
+	// i.e; 0001-01-01T00:00:00.000Z
+	return DateTime{}
+}
+
+// NewDateTimeUNIX is a representation of zero value for DateTime type as a UNIX timestamp
+func NewDateTimeUNIX() DateTime {
+	// i.e; 1970-01-01T00:00:00.000Z
 	return DateTime(time.Unix(0, 0).UTC())
 }
 
@@ -120,7 +127,6 @@ func (t *DateTime) UnmarshalText(text []byte) error {
 
 // Scan scans a DateTime value from database driver type.
 func (t *DateTime) Scan(raw interface{}) error {
-	// TODO: case int64: and case float64: ?
 	switch v := raw.(type) {
 	case []byte:
 		return t.UnmarshalText(v)
@@ -130,6 +136,22 @@ func (t *DateTime) Scan(raw interface{}) error {
 		*t = DateTime(v)
 	case nil:
 		*t = DateTime{}
+	case int64, uint64, int, uint, int32, uint32:
+		// Assume the integer passed is a system timestamp value
+		if sec, ok := v.(int64); ok {
+			*t = DateTime(time.Unix(sec, 0).UTC())
+		} else {
+			return fmt.Errorf("cannot sql.Scan() strfmt.DateTime from: %#v", v)
+		}
+	case float64, float32:
+		// Assume the number passed is a system timestamp value
+		if tt, ok := v.(float64); ok {
+			sec := int64(tt)
+			// TODO: msec
+			*t = DateTime(time.Unix(sec, 0 /*msec*/).UTC())
+		} else {
+			return fmt.Errorf("cannot sql.Scan() strfmt.DateTime from: %#v", v)
+		}
 	default:
 		return fmt.Errorf("cannot sql.Scan() strfmt.DateTime from: %#v", v)
 	}

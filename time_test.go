@@ -35,13 +35,16 @@ var (
 		{[]byte("2011-08-18T19:03:37.000000000+01:00"), time.Date(2011, 8, 18, 19, 3, 37, 0, p.Location()), "2011-08-18T19:03:37.000+01:00"},
 		{[]byte("2014-12-15T19:30:20Z"), time.Date(2014, 12, 15, 19, 30, 20, 0, time.UTC), "2014-12-15T19:30:20.000Z"},
 		{[]byte("0001-01-01T00:00:00Z"), time.Time{}.UTC(), "0001-01-01T00:00:00.000Z"},
-		{[]byte(""), time.Unix(0, 0).UTC(), "1970-01-01T00:00:00.000Z"},
-		{[]byte(nil), time.Unix(0, 0).UTC(), "1970-01-01T00:00:00.000Z"},
+		{[]byte("1970-01-01T00:00:00.000Z"), time.Unix(0, 0).UTC(), "1970-01-01T00:00:00.000Z"},
+		{[]byte("1970-01-01T00:00:00.000Z"), time.Unix(0, 0).UTC(), "1970-01-01T00:00:00.000Z"},
+		{[]byte(""), time.Time{}, "0001-01-01T00:00:00.000Z"},
+		{[]byte(nil), time.Time{}, "0001-01-01T00:00:00.000Z"},
 	}
 )
 
 func TestNewDateTime(t *testing.T) {
-	assert.EqualValues(t, time.Unix(0, 0).UTC(), NewDateTime())
+	assert.EqualValues(t, time.Unix(0, 0).UTC(), NewDateTimeUNIX())
+	assert.EqualValues(t, time.Time{}, NewDateTime())
 }
 
 func TestParseDateTime_errorCases(t *testing.T) {
