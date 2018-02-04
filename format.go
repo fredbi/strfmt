@@ -101,6 +101,8 @@ func (f *defaultFormats) MapStructureHookFunc() mapstructure.DecodeHookFunc {
 			tpe, _ := f.GetType(v.Name)
 			if to == tpe {
 				switch v.Name {
+				case "currency":
+					return Currency(data.(string)), nil
 				case "date":
 					d, err := time.Parse(RFC3339FullDate, data.(string))
 					if err != nil {
