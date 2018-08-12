@@ -2,6 +2,8 @@ module github.com/go-openapi/strfmt
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+	github.com/fredbi/uri v0.0.0-20181022182028-251e9964b305
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-openapi/errors v0.22.0
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
