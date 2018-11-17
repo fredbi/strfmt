@@ -53,6 +53,57 @@ type Registry interface {
 	MapStructureHookFunc() mapstructure.DecodeHookFunc
 }
 
+// RegistryForGenerator knows how to instruct a code generator
+// with type mappings ans zero expressions
+type RegistryForGenerator interface {
+	// Normalized returns the normalized name for a format.
+	// If the format is not supported by the registry, an empty string is
+	// returned.
+	//
+	// Example: "date-time" => "datetime"
+	Normalized(string) string
+
+	// Formats returns all (normalized) formats supported by this registry
+	Formats() []string
+
+	// Types returns all types supported by this registry
+	Types() []string
+
+	// FormatToTypes returns a map returning all mappings type -> format.
+	// Note that the package name is not added.
+	//
+	// Example:  "byte" => "Base64"
+	FormatToTypes() map[string]string
+
+	// TypeToFormats returns a map returning all mappings format -> type.
+	// Note that the package name is not added.
+	//
+	// Example: "Datetime" => "datetime"
+	TypeToFormats() map[string][]string
+
+	// ZeroExpressions returns a map of zeroing expressions for a type.
+	// Note that the package name is not added.
+	//
+	// Example: "Date" => "Date{}"
+	ZeroExpressions() map[string]string
+
+	// SchemaInfo returns the pair (swagger type, format) for a given known data type
+	//
+	// Example:
+	// example := Date{}
+	// SchemaInfo(example) => ("string","date")
+	//
+	// Returned strings are empty if the type is not known.
+	SchemaInfo(interface{}) (string, string)
+}
+
+// ExtendedRegistry implements the basic registry as well as some generation-driven
+// capabilities
+type ExtendedRegistry interface {
+	Registry
+	RegistryForGenerator
+}
+
 type knownFormat struct {
 	Name      string
 	OrigName  string
@@ -75,13 +126,13 @@ type defaultFormats struct {
 }
 
 // NewFormats creates a new formats registry seeded with the values from the default
-func NewFormats() Registry {
+func NewFormats() ExtendedRegistry {
 	//nolint:forcetypeassert
 	return NewSeededFormats(Default.(*defaultFormats).data, nil)
 }
 
 // NewSeededFormats creates a new formats registry
-func NewSeededFormats(seeds []knownFormat, normalizer NameNormalizer) Registry {
+func NewSeededFormats(seeds []knownFormat, normalizer NameNormalizer) ExtendedRegistry {
 	if normalizer == nil {
 		normalizer = DefaultNameNormalizer
 	}
@@ -323,4 +374,81 @@ func (f *defaultFormats) Parse(name, data string) (interface{}, error) {
 		}
 	}
 	return nil, errors.InvalidTypeName(name)
+}
+
+func (f *defaultFormats) Normalized(name string) string {
+	nme := f.normalizeName(name)
+	for _, format := range f.data {
+		if nme == format.Name {
+			return nme
+		}
+	}
+	return ""
+}
+
+func (f *defaultFormats) Formats() (formats []string) {
+	for _, format := range f.data {
+		formats = append(formats, format.Name)
+	}
+	return
+}
+
+func (f *defaultFormats) Types() (types []string) {
+	for _, format := range f.data {
+		types = append(types, format.Type.Name())
+	}
+	return
+}
+
+func (f *defaultFormats) FormatToTypes() map[string]string {
+	lookup := make(map[string]string, len(f.data))
+	for _, format := range f.data {
+		lookup[format.Name] = format.Type.Name()
+	}
+	return lookup
+}
+
+func (f *defaultFormats) TypeToFormats() map[string][]string {
+	lookup := make(map[string][]string, len(f.data))
+	for _, format := range f.data {
+		list := lookup[format.Type.Name()]
+		lookup[format.Type.Name()] = append(list, format.Name)
+	}
+	return lookup
+}
+
+func (f *defaultFormats) ZeroExpressions() map[string]string {
+	lookup := make(map[string]string, len(f.data))
+	lookup = map[string]string{
+		// TODO: spread this over package
+		"CreditCard": "CreditCard(\"\")",
+		"Email":      "Email(\"\")",
+		"HexColor":   "HexColor(\"#000000\")",
+		"Hostname":   "Hostname(\"\")",
+		"IPv4":       "IPv4(\"\")",
+		"IPv6":       "IPv6(\"\")",
+		"ISBN":       "ISBN(\"\")",
+		"ISBN10":     "ISBN10(\"\")",
+		"ISBN13":     "ISBN13(\"\")",
+		"MAC":        "MAC(\"\")",
+		"ObjectId":   "ObjectId(\"\")",
+		"Password":   "Password(\"\")",
+		"RGBColor":   "RGBColor(\"rgb(0,0,0)\")",
+		"SSN":        "SSN(\"\")",
+		"URI":        "URI(\"\")",
+		"UUID":       "UUID(\"\")",
+		"UUID3":      "UUID3(\"\")",
+		"UUID4":      "UUID4(\"\")",
+		"UUID5":      "UUID5(\"\")",
+		//
+		"Base64":   "Base64([]byte(nil))",
+		"Date":     "Date{}",
+		"DateTime": "DateTime{}",
+		"Duration": "Duration(0)",
+	}
+	return lookup
+}
+
+func (f *defaultFormats) SchemaInfo(interface{}) (string, string) {
+	return "", ""
 }

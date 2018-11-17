@@ -132,12 +132,12 @@ type testStruct struct {
 	D          Date       `json:"d,omitempty"`
 	DT         DateTime   `json:"dt,omitempty"`
 	Dur        Duration   `json:"dur,omitempty"`
-	URI        URI        `json:"uri,omitempty"`
+	URIField   URI        `json:"uri,omitempty" mapstructure:"uri"`
 	Eml        Email      `json:"eml,omitempty"`
-	UUID       UUID       `json:"uuid,omitempty"`
-	UUID3      UUID3      `json:"uuid3,omitempty"`
-	UUID4      UUID4      `json:"uuid4,omitempty"`
-	UUID5      UUID5      `json:"uuid5,omitempty"`
+	UUIDField  UUID       `json:"uuid,omitempty" mapstructure:"uuid"`
+	UUID3Field UUID3      `json:"uuid3,omitempty" mapstructure:"uuid3"`
+	UUID4Field UUID4      `json:"uuid4field,omitempty"`
+	UUID5Field UUID5      `json:"uuid5field,omitempty"`
 	Hn         Hostname   `json:"hn,omitempty"`
 	Ipv4       IPv4       `json:"ipv4,omitempty"`
 	Ipv6       IPv6       `json:"ipv6,omitempty"`
@@ -165,8 +165,8 @@ func TestDecodeHook(t *testing.T) {
 		"eml":        "dummy@dummy.com",
 		"uuid":       "a8098c1a-f86e-11da-bd1a-00112444be1e",
 		"uuid3":      "bcd02e22-68f0-3046-a512-327cca9def8f",
-		"uuid4":      "025b0d74-00a2-4048-bf57-227c5111bb34",
-		"uuid5":      "886313e1-3b8a-5372-9b90-0c9aee199e5d",
+		"uuid4field": "025b0d74-00a2-4048-bf57-227c5111bb34",
+		"uuid5field": "886313e1-3b8a-5372-9b90-0c9aee199e5d",
 		"hn":         "somewhere.com",
 		"ipv4":       "192.168.254.1",
 		"ipv6":       "::1",
@@ -193,12 +193,12 @@ func TestDecodeHook(t *testing.T) {
 		D:          Date(date),
 		DT:         dt,
 		Dur:        Duration(dur),
-		URI:        URI("http://www.dummy.com"),
+		URIField:   URI("http://www.dummy.com"),
 		Eml:        Email("dummy@dummy.com"),
-		UUID:       UUID("a8098c1a-f86e-11da-bd1a-00112444be1e"),
-		UUID3:      UUID3("bcd02e22-68f0-3046-a512-327cca9def8f"),
-		UUID4:      UUID4("025b0d74-00a2-4048-bf57-227c5111bb34"),
-		UUID5:      UUID5("886313e1-3b8a-5372-9b90-0c9aee199e5d"),
+		UUIDField:  UUID("a8098c1a-f86e-11da-bd1a-00112444be1e"),
+		UUID3Field: UUID3("bcd02e22-68f0-3046-a512-327cca9def8f"),
+		UUID4Field: UUID4("025b0d74-00a2-4048-bf57-227c5111bb34"),
+		UUID5Field: UUID5("886313e1-3b8a-5372-9b90-0c9aee199e5d"),
 		Hn:         Hostname("somewhere.com"),
 		Ipv4:       IPv4("192.168.254.1"),
 		Ipv6:       IPv6("::1"),
@@ -304,4 +304,147 @@ func TestDecode_ULID_Hook_Negative(t *testing.T) {
 			require.Error(t, err, "error expected got none")
 		})
 	}
+}
+
+func Test_RegistryForGenerator(t *testing.T) {
+	reg := Default
+	_ = Default.DelByName("test-format")
+
+	genReg, ok := reg.(RegistryForGenerator)
+	if !assert.True(t, ok) {
+		t.FailNow()
+	}
+
+	assert.Equal(t, "datetime", genReg.Normalized("date-time"))
+	assert.Equal(t, "", genReg.Normalized("unknown"))
+
+	assert.ElementsMatch(t, genReg.Formats(), []string{
+		"bsonobjectid",
+		"byte",
+		"creditcard",
+		"date",
+		"datetime",
+		"duration",
+		"email",
+		"hexcolor",
+		"hostname",
+		"ipv4",
+		"ipv6",
+		"isbn",
+		"isbn10",
+		"isbn13",
+		"mac",
+		"password",
+		"rgbcolor",
+		"ssn",
+		"uri",
+		"uuid",
+		"uuid3",
+		"uuid4",
+		"uuid5",
+	})
+
+	assert.ElementsMatch(t, genReg.Types(), []string{
+		"Base64",
+		"CreditCard",
+		"Date",
+		"DateTime",
+		"Duration",
+		"Email",
+		"HexColor",
+		"Hostname",
+		"IPv4",
+		"IPv6",
+		"ISBN",
+		"ISBN10",
+		"ISBN13",
+		"MAC",
+		"ObjectId",
+		"Password",
+		"RGBColor",
+		"SSN",
+		"URI",
+		"UUID",
+		"UUID3",
+		"UUID4",
+		"UUID5",
+	})
+
+	assert.Equal(t, map[string]string{
+		"bsonobjectid": "ObjectId",
+		"byte":         "Base64",
+		"creditcard":   "CreditCard",
+		"date":         "Date",
+		"datetime":     "DateTime",
+		"duration":     "Duration",
+		"email":        "Email",
+		"hexcolor":     "HexColor",
+		"hostname":     "Hostname",
+		"ipv4":         "IPv4",
+		"ipv6":         "IPv6",
+		"isbn":         "ISBN",
+		"isbn10":       "ISBN10",
+		"isbn13":       "ISBN13",
+		"mac":          "MAC",
+		"password":     "Password",
+		"rgbcolor":     "RGBColor",
+		"ssn":          "SSN",
+		"uri":          "URI",
+		"uuid":         "UUID",
+		"uuid3":        "UUID3",
+		"uuid4":        "UUID4",
+		"uuid5":        "UUID5",
+	}, genReg.FormatToTypes())
+
+	assert.Equal(t, map[string][]string{
+		"ObjectId":   []string{"bsonobjectid"},
+		"ISBN13":     []string{"isbn13"},
+		"SSN":        []string{"ssn"},
+		"Date":       []string{"date"},
+		"Email":      []string{"email"},
+		"IPv4":       []string{"ipv4"},
+		"ISBN":       []string{"isbn"},
+		"CreditCard": []string{"creditcard"},
+		"Password":   []string{"password"},
+		"ISBN10":     []string{"isbn10"},
+		"URI":        []string{"uri"},
+		"Hostname":   []string{"hostname"},
+		"IPv6":       []string{"ipv6"},
+		"MAC":        []string{"mac"},
+		"UUID":       []string{"uuid"},
+		"UUID3":      []string{"uuid3"},
+		"UUID5":      []string{"uuid5"},
+		"RGBColor":   []string{"rgbcolor"},
+		"Duration":   []string{"duration"},
+		"DateTime":   []string{"datetime"},
+		"UUID4":      []string{"uuid4"},
+		"HexColor":   []string{"hexcolor"},
+		"Base64":     []string{"byte"},
+	}, genReg.TypeToFormats())
+
+	assert.Equal(t, map[string]string{
+		"Date":       "Date{}",
+		"Hostname":   "Hostname(\"\")",
+		"RGBColor":   "RGBColor(\"rgb(0,0,0)\")",
+		"UUID3":      "UUID3(\"\")",
+		"UUID4":      "UUID4(\"\")",
+		"HexColor":   "HexColor(\"#000000\")",
+		"IPv4":       "IPv4(\"\")",
+		"IPv6":       "IPv6(\"\")",
+		"ISBN13":     "ISBN13(\"\")",
+		"MAC":        "MAC(\"\")",
+		"CreditCard": "CreditCard(\"\")",
+		"ISBN10":     "ISBN10(\"\")",
+		"Password":   "Password(\"\")",
+		"UUID5":      "UUID5(\"\")",
+		"ObjectId":   "ObjectId(\"\")",
+		"SSN":        "SSN(\"\")",
+		"URI":        "URI(\"\")",
+		"Base64":     "Base64([]byte(nil))",
+		"DateTime":   "DateTime{}",
+		"Duration":   "Duration(0)",
+		"Email":      "Email(\"\")",
+		"ISBN":       "ISBN(\"\")",
+		"UUID":       "UUID(\"\")",
+	}, genReg.ZeroExpressions())
 }
