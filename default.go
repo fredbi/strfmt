@@ -25,7 +25,6 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/fredbi/uri"
-	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -62,9 +61,7 @@ const (
 
 	// json null type
 	jsonNull = "null"
-)
 
-const (
 	// UUIDPattern Regex for UUID that allows uppercase
 	//
 	// Deprecated: strfmt no longer uses regular expressions to validate UUIDs.
