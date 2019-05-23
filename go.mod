@@ -2,7 +2,7 @@ module github.com/go-openapi/strfmt
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
-	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-openapi/errors v0.17.0
 	github.com/google/uuid v1.1.1
 	github.com/kr/pretty v0.1.0 // indirect
