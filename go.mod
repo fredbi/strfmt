@@ -6,7 +6,7 @@ require (
 	github.com/go-openapi/errors v0.17.0
 	github.com/google/uuid v1.1.1
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
+	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/stretchr/testify v1.2.2
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
