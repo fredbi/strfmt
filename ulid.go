@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/oklog/ulid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // ULID represents a ulid string format
@@ -165,6 +164,7 @@ func (u *ULID) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+<<<<<<< HEAD
 // MarshalBSON document from this value
 func (u ULID) MarshalBSON() ([]byte, error) {
 	return bson.Marshal(bson.M{"data": u.String()})
@@ -188,6 +188,8 @@ func (u *ULID) UnmarshalBSON(data []byte) error {
 	return fmt.Errorf("couldn't unmarshal bson bytes as ULID: %w", ErrFormat)
 }
 
+=======
+>>>>>>> 8628078 (experimental: move all mongo driver dependencies under build tag)
 // DeepCopyInto copies the receiver and writes its value into out.
 func (u *ULID) DeepCopyInto(out *ULID) {
 	*out = *u

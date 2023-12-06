@@ -30,7 +30,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestFormatURI(t *testing.T) {
@@ -377,14 +376,6 @@ func TestFormatBase64(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, bj, b)
 
-	bsonData, err := bson.Marshal(subj2)
-	require.NoError(t, err)
-
-	var b64Copy Base64
-	err = bson.Unmarshal(bsonData, &b64Copy)
-	require.NoError(t, err)
-	assert.Equal(t, subj2, b64Copy)
-
 	testValid(t, "byte", str)
 	testInvalid(t, "byte", "ZWxpemFiZXRocG9zZXk") // missing pad char
 
@@ -415,8 +406,8 @@ type testableFormat interface {
 	encoding.TextUnmarshaler
 	json.Marshaler
 	json.Unmarshaler
-	bson.Marshaler
-	bson.Unmarshaler
+	// bson.Marshaler TODO(fred)
+	// bson.Unmarshaler
 	fmt.Stringer
 	sql.Scanner
 	driver.Valuer
@@ -454,6 +445,7 @@ func testStringFormat(t *testing.T, what testableFormat, format, with string, va
 	require.NoError(t, err)
 	assert.Equalf(t, bj, b, "[%s]MarshalJSON: expected %v and %v to be value equal as []byte", format, string(b), with)
 
+	/* TODO(fred)
 	// bson encoding interface
 	bsonData, err := bson.Marshal(what)
 	require.NoError(t, err)
@@ -465,6 +457,7 @@ func testStringFormat(t *testing.T, what testableFormat, format, with string, va
 	val = reflect.Indirect(reflect.ValueOf(what))
 	strVal = val.String()
 	assert.EqualValuesf(t, with, strVal, "[%s]bson.Unmarshal: expected %v and %v to be equal (reset value) ", format, what, with)
+	*/
 
 	// Scanner interface
 	resetValue(t, format, what)

@@ -22,8 +22,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func init() {
@@ -186,6 +184,7 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (d Duration) MarshalBSON() ([]byte, error) {
 	return bson.Marshal(bson.M{"data": d.String()})
 }
@@ -208,6 +207,8 @@ func (d *Duration) UnmarshalBSON(data []byte) error {
 	return fmt.Errorf("couldn't unmarshal bson bytes value as Date: %w", ErrFormat)
 }
 
+=======
+>>>>>>> 8628078 (experimental: move all mongo driver dependencies under build tag)
 // DeepCopyInto copies the receiver and writes its value into out.
 func (d *Duration) DeepCopyInto(out *Duration) {
 	*out = *d

@@ -16,16 +16,11 @@ package strfmt
 
 import (
 	"database/sql/driver"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
-
-	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 var (
@@ -224,6 +219,7 @@ func (t *DateTime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+<<<<<<< HEAD
 // MarshalBSON renders the DateTime as a BSON document
 func (t DateTime) MarshalBSON() ([]byte, error) {
 	return bson.Marshal(bson.M{"data": t})
@@ -287,6 +283,8 @@ func (t *DateTime) UnmarshalBSONValue(tpe bsontype.Type, data []byte) error {
 	return nil
 }
 
+=======
+>>>>>>> 8628078 (experimental: move all mongo driver dependencies under build tag)
 // DeepCopyInto copies the receiver and writes its value into out.
 func (t *DateTime) DeepCopyInto(out *DateTime) {
 	*out = *t
