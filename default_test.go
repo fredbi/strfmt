@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -21,6 +22,12 @@ import (
 	"github.com/google/uuid"
 )
 
+func TestFred(t *testing.T) {
+	_, err := url.ParseRequestURI("https://portal.azure.com#930d042f-8145")
+	//_, err := url.ParseRequestURI("https://portal.azure.com#@930d042f-8145")
+	require.NoError(t, err)
+}
+
 func TestFormatURI(t *testing.T) {
 	uri := URI("http://somewhere.com")
 	str := "http://somewhereelse.com"
@@ -28,7 +35,8 @@ func TestFormatURI(t *testing.T) {
 		// "https://host#@frag": absolute URI with empty path and a fragment,
 		// valid per RFC 3986 (regression test for issue #131).
 		[]string{"https://portal.azure.com#@930d042f-8145-fragment"},
-		[]string{"somewhere.com"})
+		[]string{"https://portal.azure.com/#@930d042f-8145"},
+	)
 }
 
 func validEmails() []string {
