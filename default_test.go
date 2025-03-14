@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -21,10 +22,21 @@ import (
 	"github.com/google/uuid"
 )
 
+func TestFred(t *testing.T) {
+	_, err := url.ParseRequestURI("https://portal.azure.com#930d042f-8145")
+	//_, err := url.ParseRequestURI("https://portal.azure.com#@930d042f-8145")
+	require.NoError(t, err)
+}
 func TestFormatURI(t *testing.T) {
 	uri := URI("http://somewhere.com")
 	str := "http://somewhereelse.com"
-	testStringFormat(t, &uri, "uri", str, []string{}, []string{"somewhere.com"})
+	testStringFormat(t, &uri, "uri", str,
+		[]string{
+			"https://portal.azure.com/#@930d042f-8145",
+			"https://portal.azure.com#@930d042f-8145",
+		},
+		[]string{"somewhere.com"},
+	)
 }
 
 func validEmails() []string {
